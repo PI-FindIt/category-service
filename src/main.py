@@ -16,12 +16,12 @@ from strawberry.fastapi import GraphQLRouter
 from src.api.graphql import Query, Mutation
 from src.api.routes import router
 from src.api.service import serve_grpc
-from src.config.session import init_postgres_db
+from src.config.session import init_neo4j_db
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncGenerator[None, None]:
-    await init_postgres_db()
+    await init_neo4j_db()
     asyncio.create_task(serve_grpc())
     yield
 
@@ -37,7 +37,7 @@ app = FastAPI(title="Category Service", lifespan=lifespan)
 app.include_router(router, prefix="/category")
 app.include_router(graphql_app, prefix="/category/graphql")
 
-resource = Resource(attributes={SERVICE_NAME: "user-service"})
+resource = Resource(attributes={SERVICE_NAME: "category-service"})
 tracer = TracerProvider(resource=resource)
 
 otlp_exporter = OTLPSpanExporter(

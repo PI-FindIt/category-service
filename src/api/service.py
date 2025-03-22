@@ -4,7 +4,7 @@ import grpc  # type: ignore
 import protobuf.category_service.service_pb2 as service_pb2
 import protobuf.category_service.service_pb2_grpc as service_pb2_grpc
 from opentelemetry.instrumentation.grpc import GrpcAioInstrumentorServer
-from src.models.model import ModelBase
+from src.models.model import CategoryBase
 
 from src.crud.model import CrudModel
 
@@ -13,6 +13,28 @@ grpc_server_instrumentor.instrument()
 
 
 class CategoryService(service_pb2_grpc.CategoryServiceServicer):
+    async def CreateCategory(self, request, context):
+        ...
+
+    async def GetCategory(self, request, context):
+        ...
+
+    async def UpdateCategory(self, request, context):
+        ...
+
+    async def DeleteCategory(self, request, context):
+        ...
+
+    async def ListCategories(self, request, context):
+        ...
+
+    async def AddChildCategory(self, request, context):
+        ...
+
+    async def GetHierarchy(self, request, context):
+        ...
+
+
     async def CreateModel(
         self, request: service_pb2.ModelBase, context: grpc.ServicerContext
     ) -> service_pb2.Model:

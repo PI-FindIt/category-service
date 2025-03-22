@@ -1,78 +1,80 @@
-import uuid
-from typing import Type
+from typing import Type, Generic, TypeVar, Optional, Any
+from pydantic import BaseModel
+from neo4j import AsyncSession, AsyncResult
 
-from sqlmodel import select, SQLModel
-from sqlmodel.ext.asyncio.session import AsyncSession
+ModelType = TypeVar("ModelType", bound=BaseModel)
+CreateSchemaType = TypeVar("CreateSchemaType", bound=BaseModel)
+UpdateSchemaType = TypeVar("UpdateSchemaType", bound=BaseModel)
 
-from src.config.session import get_postgres_session
 
-
-class CRUDBase[
-    ModelType: SQLModel,
-    CreateSchemaType: SQLModel,
-    PrimaryKeyType: (int, str, uuid.UUID, tuple[str, str]),
-]:
-    def __init__(
-        self,
-        model: Type[ModelType],
-    ):
-        """
-        Default methods to Create, Read, Update & Delete (CRUD).
-
-        :param model: The SQLModel model to use.
-        :type model: SQLModel
-        """
+class CRUDBaseNeo4j(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
+    def __init__(self, model: Type[ModelType], label: str | None = None):
         self.model = model
+        self.label = label or model.__name__
 
-    async def _add_to_db(
-        self, obj: ModelType, session: AsyncSession | None = None
-    ) -> ModelType:
-        if session is not None:
-            session.add(obj)
-            await session.commit()
-            await session.refresh(obj)
-            return obj
+    @staticmethod
+    async def _execute_query(
+            query: str, parameters: dict[str, Any], session: AsyncSession
+    ) -> AsyncResult:
+        return await session.run(query, parameters)
 
-        async with get_postgres_session() as session:
-            session.add(obj)
-            await session.commit()
-            await session.refresh(obj)
-            return obj
+    async def create(self, obj: CreateSchemaType, session: AsyncSession) -> ModelType | None:
+        properties = obj.model_dump()
+        query = (
+            f"CREATE (n:{self.label} $props) "
+            "RETURN n"
+        )
+        result = await self._execute_query(query, {"props": properties}, session)
+        data = await result.single()
 
-    async def create(self, obj: CreateSchemaType) -> ModelType:
-        db_obj = self.model.model_validate(obj)
-        return await self._add_to_db(db_obj)
+        return self.model(**data["n"]) if data else None
 
-    async def get(
-        self, id: PrimaryKeyType, session: AsyncSession | None = None
-    ) -> ModelType | None:
-        if session is not None:
-            return await session.get(self.model, id)
-        async with get_postgres_session() as session:
-            return await session.get(self.model, id)
+    async def get(self, id: str, session: AsyncSession) -> Optional[ModelType]:
+        query = (
+            f"MATCH (n:{self.label} {{id: $id}}) "
+            "RETURN n"
+        )
+        result = await self._execute_query(query, {"id": id}, session)
+        data = await result.single()
+        return self.model(**data["n"]) if data else None
 
-    async def get_all(self) -> list[ModelType]:
-        async with get_postgres_session() as session:
-            result = await session.exec(select(self.model))
-            return list(result.all())
+    async def get_all(self, session: AsyncSession) -> list[ModelType]:
+        query = f"MATCH (n:{self.label}) RETURN n"
+        result = await self._execute_query(query, {}, session)
+        return [self.model(**record["n"]) async for record in result]
 
     async def update(
-        self, id: PrimaryKeyType, obj: CreateSchemaType
-    ) -> ModelType | None:
-        db_obj = await self.get(id)
-        if db_obj is None:
-            return None
+            self, id: str, obj: UpdateSchemaType, session: AsyncSession
+    ) -> Optional[ModelType]:
+        properties = obj.model_dump(exclude_unset=True)
+        query = (
+            f"MATCH (n:{self.label} {{id: $id}}) "
+            "SET n += $props "
+            "RETURN n"
+        )
+        result = await self._execute_query(query, {"id": id, "props": properties}, session)
+        data = await result.single()
+        return self.model(**data["n"]) if data else None
 
-        db_obj.sqlmodel_update(obj)
+    async def delete(self, id: str, session: AsyncSession) -> bool:
+        query = (
+            f"MATCH (n:{self.label} {{id: $id}}) "
+            "DELETE n"
+        )
+        await self._execute_query(query, {"id": id}, session)
+        return True  # Assume success unless exception is raised
 
-        return await self._add_to_db(db_obj)
-
-    async def delete(self, id: PrimaryKeyType) -> bool:
-        obj = await self.get(id)
-        if obj is None:
-            return False
-
-        async with get_postgres_session() as session:
-            await session.delete(obj)
-            await session.commit()
-            return True
+    async def find(
+            self,
+            filters: dict[str, Any],
+            session: AsyncSession,
+            limit: int = 100
+    ) -> list[ModelType]:
+        where_clause = " AND ".join([f"n.{key} = ${key}" for key in filters.keys()])
+        query = (
+            f"MATCH (n:{self.label}) "
+            f"WHERE {where_clause} "
+            f"RETURN n LIMIT {limit}"
+        )
+        result = await self._execute_query(query, filters, session)
+        return [self.model(**record["n"]) async for record in result]

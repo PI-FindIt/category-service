@@ -27,5 +27,10 @@ class Settings(BaseSettings):
     MONGO_URL: str = os.getenv("MONGO_URL", "mongo")
     MONGO_URI: str = f"mongodb://{MONGO_URL}:27017/"
 
+    NEO4J_URL: str = os.getenv("NEO4J_URL", "bolt://category-service_neo4j:7687") # TODO change me con
+    NEO4J_USER: str = os.getenv("NEO4J_USER", "neo4j")
+    NEO4J_PASSWORD: str = os.getenv("NEO4J_PASSWORD", "password")
+    NEO4J_DB: str = os.getenv("NEO4J_DB", "neo4j")
+
 
 settings = Settings()

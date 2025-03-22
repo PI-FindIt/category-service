@@ -9,17 +9,18 @@ from src.models.base import BaseModel
 
 
 @strawberry.type
-class _ModelAttr(PydanticBaseModel):
-    example: str
+class _CategoryAttr(PydanticBaseModel):
+    name: str
+    # see me parent must appear here
 
 
+#TODO see here because of tye type of basemodel
 @strawberry.input
-class ModelBase(BaseModel[category_service_models.ModelBase], _ModelAttr):
-    __grpc_model__ = category_service_models.ModelBase
+class CategoryBase(BaseModel[category_service_models.Category], _CategoryAttr):
+    __grpc_model__ = category_service_models.Category
 
 
 @strawberry.type
-class Model(BaseModel[category_service_models.Model], _ModelAttr, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
-
-    __grpc_model__ = category_service_models.Model
+class Category(BaseModel[category_service_models.Category], _CategoryAttr):
+    id: int
+    __grpc_model__ = category_service_models.Category
