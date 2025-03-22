@@ -980,6 +980,26 @@ files = [
 ]
 
 [[package]]
+name = "neo4j"
+version = "5.28.1"
+description = "Neo4j Bolt driver for Python"
+optional = false
+python-versions = ">=3.7"
+groups = ["main"]
+files = [
+    {file = "neo4j-5.28.1-py3-none-any.whl", hash = "sha256:6755ef9e5f4e14b403aef1138fb6315b120631a0075c138b5ddb2a06b87b09fd"},
+    {file = "neo4j-5.28.1.tar.gz", hash = "sha256:ae8e37a1d895099062c75bc359b2cce62099baac7be768d0eba7180c1298e214"},
+]
+
+[package.dependencies]
+pytz = "*"
+
+[package.extras]
+numpy = ["numpy (>=1.7.0,<3.0.0)"]
+pandas = ["numpy (>=1.7.0,<3.0.0)", "pandas (>=1.1.0,<3.0.0)"]
+pyarrow = ["pyarrow (>=1.0.0)"]
+
+[[package]]
 name = "odmantic"
 version = "1.0.2"
 description = "ODMantic, an AsyncIO MongoDB Object Document Mapper for Python using type hints"
@@ -1784,6 +1804,18 @@ files = [
 ]
 
 [[package]]
+name = "pytz"
+version = "2025.1"
+description = "World timezone definitions, modern and historical"
+optional = false
+python-versions = "*"
+groups = ["main"]
+files = [
+    {file = "pytz-2025.1-py2.py3-none-any.whl", hash = "sha256:89dd22dca55b46eac6eda23b2d72721bf1bdfef212645d81513ef5d03038de57"},
+    {file = "pytz-2025.1.tar.gz", hash = "sha256:c2db42be2a2518b28e65f9207c4d05e6ff547d1efa4086469ef855e4ab70178e"},
+]
+
+[[package]]
 name = "pyyaml"
 version = "6.0.2"
 description = "YAML parser and emitter for Python"
@@ -2326,4 +2358,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12"
-content-hash = "37448cf26e8235b1791171e38f224bd71a2b5f06ac50d0c0605c907a1fb911e2"
+content-hash = "1854a0572f78f9838311da386d20024f75a5c33a0bc2d0cb3b1bde281ddcb568"
