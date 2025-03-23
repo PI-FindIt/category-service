@@ -71,7 +71,7 @@ prepare-workflow:
 
 protobuf-gen:
 	python -m grpc_tools.protoc -I=$(PROTOBUF_FOLDER) --python_out=$(PROTOBUF_FOLDER) --grpc_python_out=$(PROTOBUF_FOLDER) --pyi_out=$(PROTOBUF_FOLDER) $(PROTOBUF_SERVICE_FILE)
-	$(SED) 's/import service_pb2/from . import service_pb2/g' $(PROTOBUF_FOLDER)/$(PROJECT_NAME_KEBAB_CASE)_pb2_grpc.py > $(PROTOBUF_FOLDER)/$(PROJECT_NAME_KEBAB_CASE)_pb2_grpc.py.tmp
+	$(SED) 's/import $(PROJECT_NAME_KEBAB_CASE)_pb2/from . import $(PROJECT_NAME_KEBAB_CASE)_pb2/g' $(PROTOBUF_FOLDER)/$(PROJECT_NAME_KEBAB_CASE)_pb2_grpc.py > $(PROTOBUF_FOLDER)/$(PROJECT_NAME_KEBAB_CASE)_pb2_grpc.py.tmp
 	mv $(PROTOBUF_FOLDER)/$(PROJECT_NAME_KEBAB_CASE)_pb2_grpc.py.tmp $(PROTOBUF_FOLDER)/$(PROJECT_NAME_KEBAB_CASE)_pb2_grpc.py
 
 protobuf-create:
