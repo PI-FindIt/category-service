@@ -1,8 +1,8 @@
 from concurrent import futures
 
 import grpc  # type: ignore
-import protobuf.service_name.service_pb2 as service_pb2
-import protobuf.service_name.service_pb2_grpc as service_pb2_grpc
+from protobuf.connections import service_name_models as service_pb2
+from protobuf.connections import service_name_servicer as service_pb2_grpc
 from opentelemetry.instrumentation.grpc import GrpcAioInstrumentorServer
 from src.models.model import ModelBase
 
