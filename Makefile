@@ -34,7 +34,7 @@ SONAR_TEMPLATE := $(TEMPLATE_FOLDER)/sonar.template.yaml
 SONAR_FILE := .github/workflows/sonar.yaml
 
 PROTOBUF_FOLDER := protobuf/$(PROJECT_NAME_SNAKE_CASE)
-PROTOBUF_SERVICE_FILE := $(PROTOBUF_FOLDER)/service.proto
+PROTOBUF_SERVICE_FILE := $(PROTOBUF_FOLDER)/$(PROJECT_NAME_KEBAB_CASE).proto
 PROTOBUF_SERVICE_FILE_TEMPLATE := $(TEMPLATE_FOLDER)/service.template.proto
 PROTOBUF_SERVICE_SERVER := src/api/service.py
 PROTOBUF_SERVICE_SERVER_TEMPLATE := $(TEMPLATE_FOLDER)/service.template.py
@@ -71,8 +71,8 @@ prepare-workflow:
 
 protobuf-gen:
 	python -m grpc_tools.protoc -I=$(PROTOBUF_FOLDER) --python_out=$(PROTOBUF_FOLDER) --grpc_python_out=$(PROTOBUF_FOLDER) --pyi_out=$(PROTOBUF_FOLDER) $(PROTOBUF_SERVICE_FILE)
-	$(SED) 's/import service_pb2/from . import service_pb2/g' $(PROTOBUF_FOLDER)/service_pb2_grpc.py > $(PROTOBUF_FOLDER)/service_pb2_grpc.py.tmp
-	mv $(PROTOBUF_FOLDER)/service_pb2_grpc.py.tmp $(PROTOBUF_FOLDER)/service_pb2_grpc.py
+	$(SED) 's/import service_pb2/from . import service_pb2/g' $(PROTOBUF_FOLDER)/$(PROJECT_NAME_KEBAB_CASE)_pb2_grpc.py > $(PROTOBUF_FOLDER)/$(PROJECT_NAME_KEBAB_CASE)_pb2_grpc.py.tmp
+	mv $(PROTOBUF_FOLDER)/$(PROJECT_NAME_KEBAB_CASE)_pb2_grpc.py.tmp $(PROTOBUF_FOLDER)/$(PROJECT_NAME_KEBAB_CASE)_pb2_grpc.py
 
 protobuf-create:
 	git submodule update --init --recursive
@@ -81,7 +81,7 @@ protobuf-create:
 	touch $(PROTOBUF_FOLDER)/__init__.py
 	$(SED) 's/ServiceName/$(PROJECT_NAME_PASCAL_CASE)/g' $(PROTOBUF_SERVICE_FILE_TEMPLATE) > $(PROTOBUF_SERVICE_FILE)
 	$(SED) 's/service_name/$(PROJECT_NAME_SNAKE_CASE)/g; s/ServiceName/$(PROJECT_NAME_PASCAL_CASE)/g' $(PROTOBUF_SERVICE_SERVER_TEMPLATE) > $(PROTOBUF_SERVICE_SERVER)
-	$(SED) 's/service_name/$(PROJECT_NAME_SNAKE_CASE)/g; s/service-name/$(PROJECT_NAME)/g; s/ServiceName/$(PROJECT_NAME_PASCAL_CASE)/g' $(PROTOBUF_CONNECTIONS_TEMPLATE) >> $(PROTOBUF_CONNECTIONS)
+	$(SED) 's/service_name/$(PROJECT_NAME_SNAKE_CASE)/g; s/service-name/$(PROJECT_NAME)/g; s/ServiceName/$(PROJECT_NAME_PASCAL_CASE)/g; s/kebab/$(PROJECT_NAME_KEBAB_CASE)/g' $(PROTOBUF_CONNECTIONS_TEMPLATE) >> $(PROTOBUF_CONNECTIONS)
 
 main-create:
 	$(SED) 's/serviceName/$(PROJECT_NAME_KEBAB_CASE)/g; s/ServiceName/$(PROJECT_NAME_SPACES)/g' $(MAIN_TEMPLATE) > $(MAIN_FILE)
