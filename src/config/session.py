@@ -81,20 +81,25 @@ async def init_neo4j_db() -> None:
             lambda tx: tx.run(
                 """
                 LOAD CSV WITH HEADERS FROM 'file:///categories.csv' AS row
-                MERGE (c:Category {id: row.id})
-                SET c.name = row.name
+                MERGE (c:Category {id: toString(row.id)})
+                SET 
+                  c.name = row.name,
+                  c.parent_id = CASE 
+                    WHEN row.parent_id IS NOT NULL AND row.parent_id <> '' 
+                    THEN toString(row.parent_id)
+                    ELSE -1        
+                  END;
                 """
             )
         )
 
         await session.execute_write(
             lambda tx: tx.run(
-                """
-                LOAD CSV WITH HEADERS FROM 'file:///categories.csv' AS row
-                WITH row WHERE row.parent_id IS NOT NULL
-                MATCH (child:Category {id: row.id})
-                MATCH (parent:Category {id: row.parent_id})
-                MERGE (child)-[:SUBCATEGORY_OF]->(parent)
+                """                
+                MATCH (child:Category)
+                WHERE child.parent_id IS NOT NULL
+                MATCH (parent:Category {id: child.parent_id})
+                MERGE (child)-[:SUBCATEGORY_OF]->(parent);
                 """
             )
         )
