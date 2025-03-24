@@ -11,6 +11,7 @@ from src.models.base import BaseModel
 @strawberry.type
 class _CategoryAttr(PydanticBaseModel):
     name: str
+    parent_id: int | None
     # see me parent must appear here
 
 
@@ -19,7 +20,7 @@ class _CategoryAttr(PydanticBaseModel):
 class CategoryBase(BaseModel[category_service_models.Category], _CategoryAttr):
     __grpc_model__ = category_service_models.Category
 
-
+    
 @strawberry.type
 class Category(BaseModel[category_service_models.Category], _CategoryAttr):
     id: int

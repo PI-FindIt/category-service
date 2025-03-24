@@ -3,7 +3,10 @@ from typing import Callable, Awaitable, Type, TypeVar
 import strawberry
 from google.protobuf.message import Message
 from grpc.aio import AioRpcError  # type: ignore
-from src.models.model import Model, ModelBase
+
+from src.config.session import get_neo4j_session
+from src.crud.model import crud_model
+from src.models.model import Category, CategoryBase
 
 from protobuf.connections import (
     category_service_stub,
@@ -35,20 +38,32 @@ async def make_grpc_call[T: BaseModel](  # type: ignore
 @strawberry.type
 class Query:
     @strawberry.field
-    async def get_model(self, id: int) -> Model:
-        return await make_grpc_call(
-            category_service_stub.GetModel,
-            Model,
-            category_service_models.ModelId(id=id),
-        )
+    # async def get_category(self, id: int) -> Category:
+    #     return await make_grpc_call(
+    #         category_service_stub.GetCategory,
+    #         Category,
+    #         category_service_models.CategoryId(id=id),
+    #     )
+    async def get_category(self, id: int) -> Category:
+        cat = await crud_model.get(str(id))
+        print(cat)
+        return cat
+
+
+    @strawberry.field
+    async def find_by_name(self, name: str) -> list[Category]:
+        filters = {"name": name}
+
+        return await crud_model.find(filters)
+
 
 
 @strawberry.type
 class Mutation:
     @strawberry.mutation
-    async def create_model(self, model: ModelBase) -> Model:
+    async def create_category(self, model: CategoryBase) -> Category:
         return await make_grpc_call(
             category_service_stub.CreateModel,
-            Model,
+            Category,
             model.to_grpc(),
         )

@@ -11,9 +11,6 @@ services:
       interval: 10s
       timeout: 10s
       retries: 5
-    ports:
-      - "7474:7474"  # HTTP
-      - "7687:7687"  # Bolt
     volumes:
       - ./categories.csv:/categories.csv
       - neo4j-logs:/logs
@@ -21,7 +18,9 @@ services:
       - category-service
       - backend
     labels:
-      - "traefik.http.routers.category-service_neo4j.rule=HostRegexp(`neo4j\\..+`) && PathPrefix(`/category`)"
+      - "traefik.http.routers.category-service_neo4j.rule=HostRegexp(`neo4j\\..+`)"
+#      the port of the neo4j browser is 7474
+      - "traefik.http.services.category-service_neo4j.loadbalancer.server.port=7474"
 
 
 
@@ -36,7 +35,7 @@ services:
       POSTGRES_URL: category-service_postgres
       MONGO_DB: mongo
       MONGO_URL: category-service_mongo
-      NEO4J_URL: bolt://neo4j:7687
+      NEO4J_URL: bolt://category-service_neo4j:7687
       NEO4J_USER: neo4j
       NEO4J_PASSWORD: password
     depends_on:
