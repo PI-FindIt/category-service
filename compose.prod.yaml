@@ -52,8 +52,6 @@ services:
       - category-service
       - backend
       - analytics
-    labels:
-      - "traefik.http.routers.category-service.rule=HostRegexp(`api\\..+`) && PathPrefix(`/category`)"
 
 
 networks:
