@@ -67,9 +67,10 @@ async def get_neo4j_session() -> AsyncGenerator[Neo4jAsyncSession, None]:
     async with neo4j_session.get_session() as session:
         yield session
 
+
 async def init_neo4j_db() -> None:
     async with get_neo4j_session() as session:
-        #Like alembic for neo4j mas mais à pata hihihi
+        # Like alembic for neo4j mas mais à pata hihihi
         await session.execute_write(
             lambda tx: tx.run(
                 "CREATE CONSTRAINT unique_category_id IF NOT EXISTS "
@@ -83,20 +84,18 @@ async def init_neo4j_db() -> None:
                 LOAD CSV WITH HEADERS FROM 'file:///categories.csv' AS row
                 MERGE (c:Category {name: row.name })
                 SET c.name = row.name;
-                
                 """
             )
         )
 
         await session.execute_write(
             lambda tx: tx.run(
-                """                
-    
-                    LOAD CSV WITH HEADERS FROM 'file:///categories.csv' AS row
-                    MATCH (child:Category {name: row.name} )
-                    WHERE row.parent_name IS NOT NULL
-                    MATCH (parent:Category {name: row.parent_name})
-                    MERGE (child)-[:SUBCATEGORY_OF]->(parent);
+                """
+                LOAD CSV WITH HEADERS FROM 'file:///categories.csv' AS row
+                MATCH (child:Category {name: row.name})
+                WHERE row.parent_name IS NOT NULL
+                MATCH (parent:Category {name: row.parent_name})
+                MERGE (child)-[:SUBCATEGORY_OF]->(parent);
                 """
             )
         )

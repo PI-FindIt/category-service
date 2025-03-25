@@ -38,12 +38,6 @@ async def make_grpc_call[T: BaseModel](  # type: ignore
 @strawberry.type
 class Query:
     @strawberry.field
-    # async def get_category(self, id: int) -> Category:
-    #     return await make_grpc_call(
-    #         category_service_stub.GetCategory,
-    #         Category,
-    #         category_service_models.CategoryId(id=id),
-    #     )
     async def get_category(self, id: int) -> Category:
         cat = await crud_model.get(str(id))
         print(cat)

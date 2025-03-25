@@ -11,6 +11,9 @@ services:
       interval: 10s
       timeout: 10s
       retries: 5
+    ports:
+      - "7474:7474"
+      - "7687:7687"
     volumes:
       - ./categories.csv:/categories.csv
       - neo4j-logs:/logs

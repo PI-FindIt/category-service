@@ -35,8 +35,8 @@ schema = strawberry.federation.Schema(
 graphql_app = GraphQLRouter(schema)
 
 app = FastAPI(title="Category Service", lifespan=lifespan)
-app.include_router(router, prefix="/category")
-app.include_router(graphql_app, prefix="/category/graphql")
+app.include_router(router, prefix="/api")
+app.include_router(graphql_app, prefix="/graphql")
 
 resource = Resource(attributes={SERVICE_NAME: "category-service"})
 tracer = TracerProvider(resource=resource)
