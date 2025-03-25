@@ -26,10 +26,11 @@ async def lifespan(_: FastAPI) -> AsyncGenerator[None, None]:
     yield
 
 
-schema = strawberry.Schema(
+schema = strawberry.federation.Schema(
     query=Query,
     mutation=Mutation,
     extensions=[OpenTelemetryExtension],
+    enable_federation_2=True,
 )
 graphql_app = GraphQLRouter(schema)
 
