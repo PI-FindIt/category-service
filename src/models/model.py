@@ -1,27 +1,33 @@
 from typing import Optional
 
 import strawberry
-from pydantic import BaseModel as PydanticBaseModel
-from sqlmodel import Field
 
-from protobuf.connections import category_service_models
 from src.models.base import BaseModel
 
 
-@strawberry.type
-class _CategoryAttr(PydanticBaseModel):
-    name: str
-    parent_id: int | None
-    # see me parent must appear here
-
-
-#TODO see here because of tye type of basemodel
 @strawberry.input
-class CategoryBase(BaseModel[category_service_models.Category], _CategoryAttr):
-    __grpc_model__ = category_service_models.Category
+class CategoryBase(BaseModel):
+    name: str
 
-    
+    @property
+    def friendly_name(self) -> str:
+        return (
+            self.name.replace("-", " ")
+            .replace("en:", "")
+            .replace("pt:", "")
+            .capitalize()
+        )
+
+
 @strawberry.type
-class Category(BaseModel[category_service_models.Category], _CategoryAttr):
-    id: int
-    __grpc_model__ = category_service_models.Category
+class Category(CategoryBase):
+    pass
+
+
+@strawberry.input
+class CategoryFilterModel(CategoryBase):
+    _optional_fields = {
+        field: (Optional[field_type], None)
+        for field, field_type in CategoryBase.__annotations__.items()
+    }
+    __annotations__ = _optional_fields

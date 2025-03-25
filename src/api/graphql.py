@@ -2,10 +2,10 @@ from typing import Any
 
 import strawberry
 
-from src.crud.model import crud_model, CrudModel
+from src.crud.model import crud_category, CrudCategory
 from src.models.model import Category, CategoryFilterModel, CategoryBase
 
-crud = CrudModel()
+crud = CrudCategory()
 
 
 @strawberry.type
@@ -14,7 +14,7 @@ class Query:
     async def categories(
         self, filter: CategoryFilterModel | None = None
     ) -> list[Category]:
-        return await crud_model.find(filter)
+        return await crud_category.find(filter)
 
 
 @strawberry.type
