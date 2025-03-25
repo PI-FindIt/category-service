@@ -27,7 +27,7 @@ class Category(CategoryBase):
 @strawberry.input
 class CategoryFilterModel(CategoryBase):
     _optional_fields = {
-        field: (Optional[field_type], None)
+        field: Optional[field_type]
         for field, field_type in CategoryBase.__annotations__.items()
     }
     __annotations__ = _optional_fields
