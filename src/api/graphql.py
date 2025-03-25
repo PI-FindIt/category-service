@@ -11,6 +11,10 @@ crud = CrudCategory()
 @strawberry.type
 class Query:
     @strawberry.field
+    async def category(self, name: str) -> Category | None:
+        return await crud_category.get(name)
+
+    @strawberry.field
     async def categories(
         self, filter: CategoryFilterModel | None = None
     ) -> list[Category]:
