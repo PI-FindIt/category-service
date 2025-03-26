@@ -1,11 +1,8 @@
-from typing import Optional
-
 import strawberry
 from pydantic import BaseModel
 
 
-@strawberry.input
-class CategoryBase(BaseModel):
+class Category(BaseModel):
     name: str
 
     @property
@@ -18,15 +15,29 @@ class CategoryBase(BaseModel):
         )
 
 
-@strawberry.type
-class Category(CategoryBase):
+@strawberry.experimental.pydantic.input(model=Category, all_fields=True)
+class CategoryInput:
     pass
 
 
-@strawberry.input
-class CategoryFilterModel(CategoryBase):
-    _optional_fields = {
-        field: Optional[field_type]
-        for field, field_type in CategoryBase.__annotations__.items()
-    }
-    __annotations__ = _optional_fields
+@strawberry.type
+class CategoryType:
+    name: str
+
+    @strawberry.field()
+    async def children(self) -> list["CategoryType"]:
+        from src.crud.model import crud_category
+
+        return [
+            CategoryType(**obj.model_dump())
+            for obj in await crud_category.get_hierarchy("children", self.name)
+        ]
+
+    @strawberry.field()
+    async def parents(self) -> list["CategoryType"]:
+        from src.crud.model import crud_category
+
+        return [
+            CategoryType(**obj.model_dump())
+            for obj in await crud_category.get_hierarchy("parents", self.name)
+        ]

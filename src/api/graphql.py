@@ -1,42 +1,42 @@
-from typing import Any
-
 import strawberry
 
 from src.crud.model import crud_category, CrudCategory
-from src.models.model import Category, CategoryFilterModel, CategoryBase
+from src.models.model import CategoryType, CategoryInput
 
 crud = CrudCategory()
 
 
 @strawberry.type
 class Query:
-    @strawberry.field
-    async def category(self, name: str) -> Category | None:
-        return await crud_category.get(name)
+    @strawberry.field()
+    async def category(self, name: str) -> CategoryType | None:
+        obj = await crud_category.get(name)
+        if obj is None:
+            return None
+        return CategoryType(**obj.model_dump())
 
-    @strawberry.field
-    async def categories(
-        self, filter: CategoryFilterModel | None = None
-    ) -> list[Category]:
-        return await crud_category.find(filter)
+    @strawberry.field()
+    async def categories(self, name: str, depth: int = -1) -> list[CategoryType]:
+        objects = await crud_category.find(name, depth)
+        return [CategoryType(**obj.model_dump()) for obj in objects]
 
 
 @strawberry.type
 class Mutation:
-    @strawberry.mutation
-    async def create_category(self, model: CategoryBase) -> Category:
-        obj = await crud.create(model)
+    @strawberry.mutation()
+    async def create_category(self, model: CategoryInput) -> CategoryType:
+        obj = await crud.create(model.to_pydantic())
         if obj is None:
             raise Exception("Not found")
-        return obj
+        return CategoryType(**obj.model_dump())
 
-    @strawberry.mutation
-    async def update_category(self, id: str, model: CategoryBase) -> Category:
-        obj = await crud.update(id, model)
+    @strawberry.mutation()
+    async def update_category(self, id: str, model: CategoryInput) -> CategoryType:
+        obj = await crud.update(id, model.to_pydantic())
         if obj is None:
             raise Exception("Not found")
-        return obj
+        return CategoryType(**obj.model_dump())
 
-    @strawberry.mutation
+    @strawberry.mutation()
     async def delete_category(self, id: str) -> bool:
         return await crud.delete(id)
