@@ -9,7 +9,6 @@ from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from opentelemetry.sdk.resources import Resource, SERVICE_NAME
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from src.api.routes import router
 from strawberry.extensions.tracing import OpenTelemetryExtension
 from strawberry.fastapi import GraphQLRouter
 
@@ -32,11 +31,10 @@ schema = strawberry.federation.Schema(
 graphql_app = GraphQLRouter(schema)
 
 app = FastAPI(title="Category Service", lifespan=lifespan)
-app.include_router(router, prefix="/api")
 app.include_router(graphql_app, prefix="/graphql")
 
 
-@router.get("/ping")
+@app.get("/ping")
 def ping() -> dict[str, str]:
     return {"message": "pong"}
 
