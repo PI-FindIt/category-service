@@ -1,4 +1,5 @@
 import strawberry
+from graphql import GraphQLError
 
 from src.crud.model import crud_category, CrudCategory
 from src.models.model import CategoryType, CategoryInput
@@ -27,16 +28,18 @@ class Mutation:
     async def create_category(self, model: CategoryInput) -> CategoryType:
         obj = await crud.create(model.to_pydantic())
         if obj is None:
-            raise Exception("Not found")
+            raise GraphQLError(
+                "Category already exists", extensions={"code": "NOT_FOUND"}
+            )
         return CategoryType(**obj.model_dump())
 
     @strawberry.mutation()
-    async def update_category(self, id: str, model: CategoryInput) -> CategoryType:
-        obj = await crud.update(id, model.to_pydantic())
+    async def update_category(self, name: str, model: CategoryInput) -> CategoryType:
+        obj = await crud.update(name, model.to_pydantic())
         if obj is None:
-            raise Exception("Not found")
+            raise GraphQLError("Category not found", extensions={"code": "NOT_FOUND"})
         return CategoryType(**obj.model_dump())
 
     @strawberry.mutation()
-    async def delete_category(self, id: str) -> bool:
-        return await crud.delete(id)
+    async def delete_category(self, name: str) -> bool:
+        return await crud.delete(name)

@@ -62,23 +62,23 @@ class CrudCategory:
             return [Category(**record["n"]) async for record in result]
 
     async def update(
-        self, id: str, obj: Category, session: AsyncSession | None = None
+        self, name: str, obj: Category, session: AsyncSession | None = None
     ) -> Optional[Category]:
         properties = obj.model_dump(exclude_unset=True)
         query: LiteralString = (
-            f"MATCH (n:Category {{id: $id}}) SET n += $props RETURN n"
+            f"MATCH (n:Category {{name: $name}}) SET n += $props RETURN n"
         )
         async with self._get_session_context(session) as session_ctx:
             result = await self._execute_query(
-                query, {"id": id, "props": properties}, session_ctx
+                query, {"name": name, "props": properties}, session_ctx
             )
             data = await result.single()
             return Category(**data["n"]) if data else None
 
-    async def delete(self, id: str, session: AsyncSession | None = None) -> bool:
-        query: LiteralString = f"MATCH (n:Category {{name: $id}}) DETACH DELETE n"
+    async def delete(self, name: str, session: AsyncSession | None = None) -> bool:
+        query: LiteralString = f"MATCH (n:Category {{name: $name}}) DETACH DELETE n"
         async with self._get_session_context(session) as session_ctx:
-            data = await self._execute_query(query, {"id": id}, session_ctx)
+            await self._execute_query(query, {"name": name}, session_ctx)
             return True
 
     async def find(
@@ -89,7 +89,7 @@ class CrudCategory:
         limit: int = 100,
     ) -> list[Category]:
         query: LiteralString = (
-            f"MATCH (n:Category) WHERE n.name = $name RETURN n LIMIT 100"
+            f"MATCH (n:Category) WHERE n.name CONTAINS $name RETURN n LIMIT 100"
         )
         async with self._get_session_context(session) as session_ctx:
             result = await self._execute_query(query, {"name": name}, session_ctx)
