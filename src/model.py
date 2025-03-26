@@ -1,12 +1,13 @@
 from typing import Literal
 
 import strawberry
-from pydantic import BaseModel
+from pydantic import BaseModel, computed_field
 
 
 class Category(BaseModel):
     name: str
 
+    @computed_field
     @property
     def friendly_name(self) -> str:
         return (
@@ -25,6 +26,7 @@ class CategoryInput:
 @strawberry.type
 class CategoryType:
     name: str
+    friendly_name: str
 
     @strawberry.field()
     async def children(self) -> list["CategoryType"]:
