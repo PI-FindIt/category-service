@@ -1,8 +1,7 @@
 from typing import Optional
 
 import strawberry
-
-from src.models.base import BaseModel
+from pydantic import BaseModel
 
 
 @strawberry.input

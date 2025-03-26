@@ -36,7 +36,7 @@ class CrudCategory:
         parameters: dict[str, Any] | None,
         session: AsyncSession,
     ) -> AsyncResult:
-        return await session.run(query, parameters, label=self.label)
+        return await session.run(query, parameters)
 
     async def create(
         self, obj: CategoryBase, session: AsyncSession | None = None
