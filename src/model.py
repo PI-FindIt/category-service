@@ -38,7 +38,7 @@ class CategoryType:
 async def get_hierarchy(
     hierarchy: Literal["children", "parents"], name: str
 ) -> list[CategoryType]:
-    from src.crud.model import crud_category
+    from src.crud import crud_category
 
     return [
         CategoryType(**obj.model_dump())

@@ -10,7 +10,7 @@ from typing import (
 from neo4j import AsyncSession, AsyncResult
 
 from src.config.session import get_neo4j_session
-from src.models.model import Category
+from src.model import Category
 
 
 class CrudCategory:

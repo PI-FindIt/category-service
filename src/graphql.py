@@ -1,8 +1,8 @@
 import strawberry
 from graphql import GraphQLError
 
-from src.crud.model import crud_category, CrudCategory
-from src.models.model import CategoryType, CategoryInput
+from src.crud import crud_category, CrudCategory
+from src.model import CategoryType, CategoryInput
 
 crud = CrudCategory()
 
