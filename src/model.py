@@ -14,7 +14,7 @@ class CategoryModel(BaseModel):
 
 
 @strawberry.experimental.pydantic.input(model=CategoryModel, all_fields=True)
-class CategoryInput:
+class CategoryBase:
     pass
 
 
