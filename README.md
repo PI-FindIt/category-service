@@ -27,7 +27,6 @@ One can use subdomains, such as `api.localhost`, to access the services.
 
 | Service    | Port  | Subdomain | Available |
 |------------|-------|-----------|-----------|
-| gRPC       | 50051 | N/A       | No        |
 | FastAPI    | 8000  | api       | Yes       |
 | PostgreSQL | 5432  | postgres  | Dev only  |
 | MongoDB    | 27017 | mongo     | Dev only  |

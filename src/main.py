@@ -1,4 +1,3 @@
-import asyncio
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
@@ -13,31 +12,34 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from strawberry.extensions.tracing import OpenTelemetryExtension
 from strawberry.fastapi import GraphQLRouter
 
-from src.api.graphql import Query, Mutation
-from src.api.routes import router
-from src.api.service import serve_grpc
-from src.config.session import init_postgres_db
+from src.config.session import init_neo4j_db
+from src.graphql import Query, Mutation
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncGenerator[None, None]:
-    await init_postgres_db()
-    asyncio.create_task(serve_grpc())
+    await init_neo4j_db()
     yield
 
 
-schema = strawberry.Schema(
+schema = strawberry.federation.Schema(
     query=Query,
     mutation=Mutation,
     extensions=[OpenTelemetryExtension],
+    enable_federation_2=True,
 )
 graphql_app = GraphQLRouter(schema)
 
 app = FastAPI(title="Category Service", lifespan=lifespan)
-app.include_router(router, prefix="/category")
-app.include_router(graphql_app, prefix="/category/graphql")
+app.include_router(graphql_app, prefix="/graphql")
 
-resource = Resource(attributes={SERVICE_NAME: "user-service"})
+
+@app.get("/ping")
+def ping() -> dict[str, str]:
+    return {"message": "pong"}
+
+
+resource = Resource(attributes={SERVICE_NAME: "category-service"})
 tracer = TracerProvider(resource=resource)
 
 otlp_exporter = OTLPSpanExporter(

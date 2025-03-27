@@ -1,44 +1,31 @@
 services:
-  category-service_postgres:
-    image: postgres:17-alpine
+  category-service_neo4j:
+    image: neo4j:2025.02-community-bullseye
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
-
+      NEO4J_AUTH: neo4j/password
+      NEO4J_ACCEPT_LICENSE_AGREEMENT: 'yes'
+      NEO4JLABS_PLUGINS: '["apoc"]'
+      NEO4J_server_directories_import: '/'
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "postgres"]
-      interval: 2s
-      timeout: 5s
+      test: [ "CMD", "cypher-shell", "-u", "neo4j", "-p", "password", "RETURN 1;" ]
+      interval: 10s
+      timeout: 10s
       retries: 5
-    restart: unless-stopped
+    ports:
+      - "7474:7474"
+      - "7687:7687"
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - ./categories.csv:/categories.csv
+      - neo4j-logs:/logs
     networks:
       - category-service
       - backend
     labels:
-      - "traefik.http.routers.category-service_postgres.rule=HostRegexp(`postgres\\..+`) && PathPrefix(`/category`)"
+      - "traefik.http.routers.category-service_neo4j.rule=HostRegexp(`neo4j\\..+`)"
+#      the port of the neo4j browser is 7474
+      - "traefik.http.services.category-service_neo4j.loadbalancer.server.port=7474"
 
-#  category-service_mongo:
-#    image: mongo:8.0
-#    environment:
-#      MONGO_INITDB_ROOT_USERNAME: root
-#      MONGO_INITDB_ROOT_PASSWORD: root
-#      MONGO_INITDB_DATABASE: mongo
-#    restart: unless-stopped
-#    healthcheck:
-#      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
-#      interval: 2s
-#      timeout: 10s
-#      retries: 5
-#    volumes:
-#      - mongo-data:/data/db
-#    networks:
-#      - category-service
-#      - backend
-#    labels:
-#      - "traefik.http.routers.category-service_mongo.rule=HostRegexp(`mongo\\..+`) && PathPrefix(`/category`)"
+
 
   category-service:
     build:
@@ -51,10 +38,13 @@ services:
       POSTGRES_URL: category-service_postgres
       MONGO_DB: mongo
       MONGO_URL: category-service_mongo
+      NEO4J_URL: bolt://category-service_neo4j:7687
+      NEO4J_USER: neo4j
+      NEO4J_PASSWORD: password
     depends_on:
-      category-service_postgres:
-        condition: service_healthy
       elasticsearch:
+        condition: service_healthy
+      category-service_neo4j:
         condition: service_healthy
 #      category-service_mongo:
 #        condition: service_healthy
@@ -66,10 +56,11 @@ services:
       - backend
       - analytics
     labels:
-      - "traefik.http.routers.category-service.rule=HostRegexp(`api\\..+`) && PathPrefix(`/category`)"
+      - "traefik.http.routers.category-service.rule=HostRegexp(`api-debug\\..+`) && PathPrefix(`/category`)"
 
 networks:
   category-service:
 volumes:
   postgres-data:
   mongo-data:
+  neo4j-logs:
