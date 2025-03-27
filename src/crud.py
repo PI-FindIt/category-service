@@ -84,9 +84,9 @@ class CrudCategory:
     async def find(
         self,
         name: str,
-        depth: int = -1,
+        # depth: int = -1, soon
+        # limit: int = 100, soon
         session: AsyncSession | None = None,
-        limit: int = 100,
     ) -> list[Category]:
         query: LiteralString = (
             f"MATCH (n:Category) WHERE n.name CONTAINS $name RETURN n LIMIT 100"
