@@ -37,7 +37,7 @@ class CrudCategory:
         self, obj: CategoryModel, session: AsyncSession | None = None
     ) -> CategoryModel | None:
         properties = obj.model_dump()
-        query: LiteralString = f"CREATE (n:Category $props) RETURN n"
+        query: LiteralString = "CREATE (n:Category $props) RETURN n"
         async with self._get_session_context(session) as session_ctx:
             result = await self._execute_query(
                 query, {"props": properties}, session_ctx
@@ -49,14 +49,14 @@ class CrudCategory:
     async def get(
         self, name: str, session: AsyncSession | None = None
     ) -> Optional[CategoryModel]:
-        query: LiteralString = f"MATCH (n:Category {{name: $name}}) RETURN n"
+        query: LiteralString = "MATCH (n:Category {name: $name}) RETURN n"
         async with self._get_session_context(session) as session_ctx:
             result = await self._execute_query(query, {"name": name}, session_ctx)
             data = await result.single()
         return CategoryModel(**data["n"]) if data else None
 
     async def get_all(self, session: AsyncSession | None = None) -> list[CategoryModel]:
-        query: LiteralString = f"MATCH (n:Category) RETURN n"
+        query: LiteralString = "MATCH (n:Category) RETURN n"
         async with self._get_session_context(session) as session_ctx:
             result = await self._execute_query(query, None, session_ctx)
             return [CategoryModel(**record["n"]) async for record in result]
@@ -66,7 +66,7 @@ class CrudCategory:
     ) -> Optional[CategoryModel]:
         properties = obj.model_dump(exclude_unset=True)
         query: LiteralString = (
-            f"MATCH (n:Category {{name: $name}}) SET n += $props RETURN n"
+            "MATCH (n:Category {name: $name}) SET n += $props RETURN n"
         )
         async with self._get_session_context(session) as session_ctx:
             result = await self._execute_query(
@@ -76,7 +76,7 @@ class CrudCategory:
             return CategoryModel(**data["n"]) if data else None
 
     async def delete(self, name: str, session: AsyncSession | None = None) -> bool:
-        query: LiteralString = f"MATCH (n:Category {{name: $name}}) DETACH DELETE n"
+        query: LiteralString = "MATCH (n:Category {name: $name}) DETACH DELETE n"
         async with self._get_session_context(session) as session_ctx:
             await self._execute_query(query, {"name": name}, session_ctx)
             return True
@@ -84,12 +84,10 @@ class CrudCategory:
     async def find(
         self,
         name: str,
-        # depth: int = -1, soon
-        # limit: int = 100, soon
         session: AsyncSession | None = None,
     ) -> list[CategoryModel]:
         query: LiteralString = (
-            f"MATCH (n:Category) WHERE n.name CONTAINS $name RETURN n LIMIT 100"
+            "MATCH (n:Category) WHERE n.name CONTAINS $name RETURN n LIMIT 100"
         )
         async with self._get_session_context(session) as session_ctx:
             result = await self._execute_query(query, {"name": name}, session_ctx)

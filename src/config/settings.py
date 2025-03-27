@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     PRODUCTION: bool = os.getenv("ENV") == "production"
 
     STATIC_PATH: str = "/static"
-    BACKEND_CORS_ORIGINS: list[str] = field(default_factory=lambda: ["*"])  # TODO
+    BACKEND_CORS_ORIGINS: list[str] = field(default_factory=lambda: ["*"])
 
     # PostgreSQL
     POSTGRES_USER: str = os.getenv("POSTGRES_USER", "postgres")
@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     POSTGRES_DB: str = os.getenv("POSTGRES_DB", "postgres")
     POSTGRES_URL: str = os.getenv("POSTGRES_URL", "postgres")
     POSTGRES_URI: str = (
-                f"postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_URL}:5432/{POSTGRES_DB}"
+        f"postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_URL}:5432/{POSTGRES_DB}"
     )
 
     # MongoDB
@@ -27,7 +27,7 @@ class Settings(BaseSettings):
     MONGO_URL: str = os.getenv("MONGO_URL", "mongo")
     MONGO_URI: str = f"mongodb://{MONGO_URL}:27017/"
 
-    NEO4J_URL: str = os.getenv("NEO4J_URL", "bolt://category-service_neo4j:7687") # TODO change me con
+    NEO4J_URL: str = os.getenv("NEO4J_URL", "bolt://category-service_neo4j:7687")
     NEO4J_USER: str = os.getenv("NEO4J_USER", "neo4j")
     NEO4J_PASSWORD: str = os.getenv("NEO4J_PASSWORD", "password")
     NEO4J_DB: str = os.getenv("NEO4J_DB", "neo4j")

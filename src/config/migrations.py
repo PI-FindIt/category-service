@@ -41,7 +41,7 @@ class MigrationRunner:
         filename = f"{timestamp}_{name}.cypher"
         path = os.path.join(self.migration_dir, filename)
 
-        content = f"""# --- !Ups
+        content = """# --- !Ups
 # Add your UP migration Cypher here
 
 
@@ -98,7 +98,6 @@ class MigrationRunner:
             raise ValueError(f"Invalid migration file format in {filename}")
 
         up_cypher = up_part.group(1).strip()
-        down_cypher = down_part.group(1).strip()
 
         try:
             # Execute upgrade
