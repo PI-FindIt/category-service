@@ -10,12 +10,7 @@ class Category(BaseModel):
     @computed_field
     @property
     def friendly_name(self) -> str:
-        return (
-            self.name.replace("-", " ")
-            .replace("en:", "")
-            .replace("pt:", "")
-            .capitalize()
-        )
+        return self.name.replace("-", " ").capitalize()
 
 
 @strawberry.experimental.pydantic.input(model=Category, all_fields=True)
@@ -34,7 +29,7 @@ class CategoryType:
 
     @strawberry.field()
     async def parents(self) -> list["CategoryType"]:
-        return await get_hierarchy("children", self.name)
+        return await get_hierarchy("parents", self.name)
 
 
 async def get_hierarchy(
