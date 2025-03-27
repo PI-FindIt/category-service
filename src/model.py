@@ -4,7 +4,7 @@ import strawberry
 from pydantic import BaseModel, computed_field
 
 
-class Category(BaseModel):
+class CategoryModel(BaseModel):
     name: str
 
     @computed_field
@@ -13,31 +13,31 @@ class Category(BaseModel):
         return self.name.replace("-", " ").capitalize()
 
 
-@strawberry.experimental.pydantic.input(model=Category, all_fields=True)
+@strawberry.experimental.pydantic.input(model=CategoryModel, all_fields=True)
 class CategoryInput:
     pass
 
 
 @strawberry.type
-class CategoryType:
+class Category:
     name: str
     friendly_name: str
 
     @strawberry.field()
-    async def children(self) -> list["CategoryType"]:
+    async def children(self) -> list["Category"]:
         return await get_hierarchy("children", self.name)
 
     @strawberry.field()
-    async def parents(self) -> list["CategoryType"]:
+    async def parents(self) -> list["Category"]:
         return await get_hierarchy("parents", self.name)
 
 
 async def get_hierarchy(
     hierarchy: Literal["children", "parents"], name: str
-) -> list[CategoryType]:
+) -> list[Category]:
     from src.crud import crud_category
 
     return [
-        CategoryType(**obj.model_dump())
+        Category(**obj.model_dump())
         for obj in await crud_category.get_hierarchy(hierarchy, name)
     ]

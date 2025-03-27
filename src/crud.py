@@ -10,7 +10,7 @@ from typing import (
 from neo4j import AsyncSession, AsyncResult
 
 from src.config.session import get_neo4j_session
-from src.model import Category
+from src.model import CategoryModel
 
 
 class CrudCategory:
@@ -34,8 +34,8 @@ class CrudCategory:
         return await session.run(query, parameters)
 
     async def create(
-        self, obj: Category, session: AsyncSession | None = None
-    ) -> Category | None:
+        self, obj: CategoryModel, session: AsyncSession | None = None
+    ) -> CategoryModel | None:
         properties = obj.model_dump()
         query: LiteralString = f"CREATE (n:Category $props) RETURN n"
         async with self._get_session_context(session) as session_ctx:
@@ -44,26 +44,26 @@ class CrudCategory:
             )
             data = await result.single()
 
-        return Category(**data["n"]) if data else None
+        return CategoryModel(**data["n"]) if data else None
 
     async def get(
         self, name: str, session: AsyncSession | None = None
-    ) -> Optional[Category]:
+    ) -> Optional[CategoryModel]:
         query: LiteralString = f"MATCH (n:Category {{name: $name}}) RETURN n"
         async with self._get_session_context(session) as session_ctx:
             result = await self._execute_query(query, {"name": name}, session_ctx)
             data = await result.single()
-        return Category(**data["n"]) if data else None
+        return CategoryModel(**data["n"]) if data else None
 
-    async def get_all(self, session: AsyncSession | None = None) -> list[Category]:
+    async def get_all(self, session: AsyncSession | None = None) -> list[CategoryModel]:
         query: LiteralString = f"MATCH (n:Category) RETURN n"
         async with self._get_session_context(session) as session_ctx:
             result = await self._execute_query(query, None, session_ctx)
-            return [Category(**record["n"]) async for record in result]
+            return [CategoryModel(**record["n"]) async for record in result]
 
     async def update(
-        self, name: str, obj: Category, session: AsyncSession | None = None
-    ) -> Optional[Category]:
+        self, name: str, obj: CategoryModel, session: AsyncSession | None = None
+    ) -> Optional[CategoryModel]:
         properties = obj.model_dump(exclude_unset=True)
         query: LiteralString = (
             f"MATCH (n:Category {{name: $name}}) SET n += $props RETURN n"
@@ -73,7 +73,7 @@ class CrudCategory:
                 query, {"name": name, "props": properties}, session_ctx
             )
             data = await result.single()
-            return Category(**data["n"]) if data else None
+            return CategoryModel(**data["n"]) if data else None
 
     async def delete(self, name: str, session: AsyncSession | None = None) -> bool:
         query: LiteralString = f"MATCH (n:Category {{name: $name}}) DETACH DELETE n"
@@ -87,20 +87,20 @@ class CrudCategory:
         # depth: int = -1, soon
         # limit: int = 100, soon
         session: AsyncSession | None = None,
-    ) -> list[Category]:
+    ) -> list[CategoryModel]:
         query: LiteralString = (
             f"MATCH (n:Category) WHERE n.name CONTAINS $name RETURN n LIMIT 100"
         )
         async with self._get_session_context(session) as session_ctx:
             result = await self._execute_query(query, {"name": name}, session_ctx)
-            return [Category(**record["n"]) async for record in result]
+            return [CategoryModel(**record["n"]) async for record in result]
 
     async def get_hierarchy(
         self,
         hierarchy: Literal["children", "parents"],
         name: str,
         session: AsyncSession | None = None,
-    ) -> list[Category]:
+    ) -> list[CategoryModel]:
         a: LiteralString = "m" if hierarchy == "children" else "n"
         b: LiteralString = "n" if hierarchy == "children" else "m"
 
@@ -109,7 +109,7 @@ class CrudCategory:
         )
         async with self._get_session_context(session) as session_ctx:
             result = await self._execute_query(query, {"name": name}, session_ctx)
-            return [Category(**record[b]) async for record in result]
+            return [CategoryModel(**record[b]) async for record in result]
 
 
 crud_category = CrudCategory()
