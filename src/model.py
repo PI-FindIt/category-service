@@ -1,7 +1,12 @@
-from typing import Literal
+from typing import Literal, Optional
 
 import strawberry
 from pydantic import BaseModel, computed_field
+
+
+@strawberry.federation.type(keys=["ean"], extend=True)
+class Product:
+    ean: str = strawberry.federation.field(external=True)
 
 
 class CategoryModel(BaseModel):
@@ -18,7 +23,7 @@ class CategoryBase:
     pass
 
 
-@strawberry.type
+@strawberry.federation.type(keys=["name"])
 class Category:
     name: str
     friendly_name: str
@@ -30,6 +35,13 @@ class Category:
     @strawberry.field()
     async def parents(self) -> list["Category"]:
         return await get_hierarchy("parents", self.name)
+
+    @classmethod
+    async def resolve_reference(cls, name: str) -> Optional["Category"]:
+        from src.crud import crud_category
+
+        category_model = await crud_category.get(name)
+        return Category(**category_model.model_dump()) if category_model else None
 
 
 async def get_hierarchy(
