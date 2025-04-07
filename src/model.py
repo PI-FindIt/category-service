@@ -4,11 +4,6 @@ import strawberry
 from pydantic import BaseModel, computed_field
 
 
-@strawberry.federation.type(keys=["ean"], extend=True)
-class Product:
-    ean: str = strawberry.federation.field(external=True)
-
-
 class CategoryModel(BaseModel):
     name: str
 
