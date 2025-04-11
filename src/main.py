@@ -14,6 +14,7 @@ from strawberry.fastapi import GraphQLRouter
 
 from src.config.session import init_neo4j_db
 from src.graphql import Query, Mutation
+from src.config.settings import settings
 
 
 @asynccontextmanager
@@ -25,7 +26,7 @@ async def lifespan(_: FastAPI) -> AsyncGenerator[None, None]:
 schema = strawberry.federation.Schema(
     query=Query,
     mutation=Mutation,
-    extensions=[OpenTelemetryExtension],
+    extensions=[OpenTelemetryExtension] if settings.TELEMETRY else [],
     enable_federation_2=True,
 )
 graphql_app = GraphQLRouter(schema)
@@ -39,14 +40,15 @@ def ping() -> dict[str, str]:
     return {"message": "pong"}
 
 
-resource = Resource(attributes={SERVICE_NAME: "category-service"})
-tracer = TracerProvider(resource=resource)
+if settings.TELEMETRY:
+    resource = Resource(attributes={SERVICE_NAME: "category-service"})
+    tracer = TracerProvider(resource=resource)
 
-otlp_exporter = OTLPSpanExporter(
-    endpoint="apm-server:8200",
-    insecure=True,
-)
-tracer.add_span_processor(BatchSpanProcessor(otlp_exporter))
-trace.set_tracer_provider(tracer)
+    otlp_exporter = OTLPSpanExporter(
+        endpoint="apm-server:8200",
+        insecure=True,
+    )
+    tracer.add_span_processor(BatchSpanProcessor(otlp_exporter))
+    trace.set_tracer_provider(tracer)
 
-FastAPIInstrumentor.instrument_app(app)
+    FastAPIInstrumentor.instrument_app(app)

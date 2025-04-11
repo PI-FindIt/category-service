@@ -9,6 +9,7 @@ class Settings(BaseSettings):
         env_file=".env", env_file_encoding="utf-8", case_sensitive=True, extra="ignore"
     )
     PRODUCTION: bool = os.getenv("ENV") == "production"
+    TELEMETRY: bool = os.getenv("TEL", "false").lower() == "true"
 
     STATIC_PATH: str = "/static"
     BACKEND_CORS_ORIGINS: list[str] = field(default_factory=lambda: ["*"])
