@@ -16,27 +16,26 @@ services:
     networks:
       - category-service
 
-#  category-service_mongo:
-#    image: mongo:8.0
-#    environment:
-#      MONGO_INITDB_ROOT_USERNAME: root
-#      MONGO_INITDB_ROOT_PASSWORD: root
-#    restart: unless-stopped
-#    healthcheck:
-#      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
-#      interval: 2s
-#      timeout: 10s
-#      retries: 5
-#    volumes:
-#      - mongo-data:/data/db
-#    networks:
-#      - category-service
+  #  category-service_mongo:
+  #    image: mongo:8.0
+  #    environment:
+  #      MONGO_INITDB_ROOT_USERNAME: root
+  #      MONGO_INITDB_ROOT_PASSWORD: root
+  #    restart: unless-stopped
+  #    healthcheck:
+  #      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+  #      interval: 2s
+  #      timeout: 10s
+  #      retries: 5
+  #    volumes:
+  #      - mongo-data:/data/db
+  #    networks:
+  #      - category-service
 
   category-service:
     build:
       dockerfile: Dockerfile.prod
     restart: unless-stopped
-    env_file: .env
     environment:
       - POSTGRES_URL=category-service_postgres
       - MONGO_URL=category-service_mongo
@@ -45,14 +44,13 @@ services:
         condition: service_healthy
       elasticsearch:
         condition: service_healthy
-#      category-service_mongo:
-#        condition: service_healthy
+    #      category-service_mongo:
+    #        condition: service_healthy
     tty: true
     networks:
       - category-service
       - backend
       - analytics
-
 
 networks:
   category-service:
