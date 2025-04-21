@@ -8,7 +8,7 @@ WORKDIR /category-service
 RUN pip install --no-cache poetry
 
 COPY . .
-RUN poetry install --no-dev
+RUN poetry install --without dev
 
 EXPOSE 8000
 CMD [ "poetry", "run", "gunicorn", "src.main:app", "--bind", "0.0.0.0:8000", "-k", "uvicorn.workers.UvicornWorker" ]
