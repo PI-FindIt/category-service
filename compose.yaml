@@ -44,6 +44,7 @@ services:
       category-service_neo4j:
         condition: service_healthy
     volumes:
+      - /category-service/.venv
       - .:/category-service
     tty: true
     networks:

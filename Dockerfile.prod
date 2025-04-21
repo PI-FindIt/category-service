@@ -5,10 +5,10 @@ ENV ENV production
 
 WORKDIR /category-service
 
-RUN pip install --no-cache poetry
+RUN pip install --no-cache uv
 
 COPY . .
-RUN poetry install --without dev
+RUN uv sync
 
 EXPOSE 8000
-CMD [ "poetry", "run", "gunicorn", "src.main:app", "--bind", "0.0.0.0:8000", "-k", "uvicorn.workers.UvicornWorker" ]
+CMD [ "uv", "run", "gunicorn", "src.main:app", "--bind", "0.0.0.0:8000", "-k", "uvicorn.workers.UvicornWorker" ]

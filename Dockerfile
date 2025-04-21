@@ -1,14 +1,17 @@
-FROM python:3.13-alpine
+FROM ghcr.io/astral-sh/uv:python3.13-alpine
 ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
+ENV UV_COMPILE_BYTECODE=1
+ENV UV_LINK_MODE=copy
 ENV ENV development
 
 WORKDIR /category-service
 
-RUN pip install --no-cache poetry
+ENV PATH="/category-service/.venv/bin:$PATH"
 
-COPY poetry.lock pyproject.toml ./
-RUN poetry config virtualenvs.in-project false && poetry env use python && poetry install --with dev
+COPY uv.lock pyproject.toml ./
+COPY patches/ ./patches/
+RUN uv sync --frozen
 
 EXPOSE 8000
-CMD [ "poetry", "run", "uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload" ]
+CMD [ "uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload" ]
