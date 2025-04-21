@@ -10,7 +10,6 @@ WORKDIR /category-service
 ENV PATH="/category-service/.venv/bin:$PATH"
 
 COPY uv.lock pyproject.toml ./
-COPY patches/ ./patches/
 RUN uv sync --frozen
 
 EXPOSE 8000
